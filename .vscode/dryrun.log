@@ -1,5 +1,0 @@
-make --dry-run --keep-going --print-directory
-make: Entering directory '/home/schartz/code/vulkan/toyEngine'
-g++ -std=c++17 -O2 -o VulkanTest.out *.cpp -lglfw -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
-make: Leaving directory '/home/schartz/code/vulkan/toyEngine'
- 
