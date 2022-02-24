@@ -10,4 +10,6 @@ test: VulkanTest
 	./VulkanTest.out
 
 clean:
-	rm -f VulkanTest
+	rm -f VulkanTest.out
+
+all: test clean
