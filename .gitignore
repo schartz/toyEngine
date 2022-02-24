@@ -1,4 +1,4 @@
 *.out
-*.spv
+*.*.spv
 .vscode/
 .idea
