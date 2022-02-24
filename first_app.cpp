@@ -19,7 +19,9 @@ namespace lve {
     void FirstApp::run() {
         while(!lveWindow.shouldClose()) {
             glfwPollEvents();
+            drawFrame();
         }
+        vkDeviceWaitIdle(lveDevice.device());
     }
 
     void FirstApp::createPipelineLayout(){
@@ -63,7 +65,7 @@ namespace lve {
             beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
             if(vkBeginCommandBuffer(commandBuffers[i], &beginInfo) != VK_SUCCESS) {
-                throw std::runtime_error("Command buffer faile to begin recording");
+                throw std::runtime_error("Command buffer failed to begin recording");
             }
 
             VkRenderPassBeginInfo renderPassInfo{};
@@ -80,9 +82,31 @@ namespace lve {
             renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
             renderPassInfo.pClearValues = clearValues.data();
 
-
             vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+            lvePipeline->bind(commandBuffers[i]);
+            vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
+            vkCmdEndRenderPass(commandBuffers[i]);
+            if(vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {
+                throw std::runtime_error("Failed to end command buffers after recording it");
+            }
         }
     }
-    void FirstApp::drawFrame() {}
+    void FirstApp::drawFrame() {
+        uint32_t imageIndex;
+        auto result = lveSwapChain.acquireNextImage(&imageIndex);
+
+        if(result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
+            throw std::runtime_error("failed to acquire the nest swap chain image");
+        }
+
+        /**
+         * Submit the provided command buffer to GPU graphics queu
+         * and handle CPU and GPU synchronizations.
+         **/
+        result = lveSwapChain.submitCommandBuffers(&commandBuffers[imageIndex], &imageIndex);
+        if(result != VK_SUCCESS) {
+            throw std::runtime_error("failed to present swap chain image");
+        }
+    }
 }
